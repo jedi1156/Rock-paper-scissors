@@ -3,7 +3,7 @@ OpenCV.pass_semester(semester_id: 5)
 
 # setup on osx
 
-OpenCV version 2.4.6.1 has broken wabcam support on osx is broken. Use 2.4.6:
+OpenCV version 2.4.6.1 has broken wabcam support on osx. Use 2.4.6:
 
 Change `/usr/local/Library/Taps/homebrew-science/opencv.rb` :
 
