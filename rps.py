@@ -9,13 +9,19 @@ camera = cv2.VideoCapture(0)
 
 skin_min = np.array([0, 0, 70], np.uint8)
 skin_max = np.array([20, 255, 255], np.uint8)
+iteration = 0
 
 def read_image():
   ret, image = camera.read(0)
   return image
 
 def get_image():
+  global scan
+  global iteration
   frame = read_image()
+
+  cv2.accumulateWeighted(frame, scan, 0.005)
+
   frame = frame.astype(np.int32)
   result = np.subtract(scan, frame)
   result = np.abs(result)
@@ -72,7 +78,7 @@ print("Rock Paper Scissors")
 print("scan BACKGROUND")
 cv2.waitKey(scan_time)
 scan = read_image()
-scan = scan.astype(np.int32)
+scan = np.float32(scan)
 
 print("scan ROCK")
 cv2.waitKey(scan_time)
@@ -89,15 +95,14 @@ cv2.waitKey(scan_time)
 scissors = get_figure()
 show(scissors)
 
-i = 0
 while True:
   thresh = get_threshold()
   show(thresh)
-  i = i + 1
-  if i % 10 == 0:
+  iteration += 1
+  if iteration % 10 == 0:
     comparision = compare(thresh)
     winner = { v:k for k, v in comparision.items() }[max(comparision.values())]
-    print('Round %d' % i)
+    print('Round %d' % iteration)
     print('Rock: %f' % comparision['rock'])
     print('Paper: %f' % comparision['paper'])
     print('Scissors: %f' % comparision['scissors'])
