@@ -20,14 +20,17 @@ def get_image():
   global iteration
   frame = read_image()
 
-  cv2.accumulateWeighted(frame, scan, 0.005)
-
-  frame = frame.astype(np.int32)
-  result = np.subtract(scan, frame)
+  result = frame.astype(np.int32)
+  result = np.subtract(scan, result)
   result = np.abs(result)
   result = result.astype(np.uint8)
   result = cv2.cvtColor(result, cv2.COLOR_BGR2HSV)
   result = cv2.inRange(result, np.array([0, 0, 50]), np.array([255, 255, 255]))
+
+  neg_result = result == 0
+
+  cv2.accumulateWeighted(frame, scan, 0.005, neg_result)
+
   return result
 
 def get_contours(image):
