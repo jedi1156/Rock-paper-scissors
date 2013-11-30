@@ -16,7 +16,7 @@ def read_image():
   ret, image = camera.read(0)
   return image
 
-lowThreshold = 0
+lowThreshold = 30
 max_lowThreshold = 100
 ratio = 3
 kernel_size = 3
@@ -34,14 +34,15 @@ def get_image():
   result = cv2.erode(result, np.ones((10, 10)))
   result = cv2.dilate(result, np.ones((20, 20)))
 
-  gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-  cannied = cv2.GaussianBlur(gray,(3,3),0)
-  cannied = cv2.Canny(cannied,lowThreshold,lowThreshold*ratio,apertureSize = kernel_size)
+  #gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+  #cannied = cv2.GaussianBlur(gray,(3,3),0)
+  #cannied = cv2.Canny(cannied,lowThreshold,lowThreshold*ratio,apertureSize = kernel_size)
 
   #if not isScanning():
   #cv2.accumulateWeighted(frame, scan, 0.005)
 
-  return result & cannied
+  #return result & cannied
+  return result
 
 
 def get_contours(image):
@@ -123,12 +124,14 @@ cv2.waitKey(scan_time)
 scan = read_image()
 scan = np.float32(scan)
 
+"""
 rock = Pattern("ROCK")
 paper = Pattern("PAPER")
 scissors = Pattern("SCISSORS")
 patterns = (rock, paper, scissors)
 for p in patterns:
   p.show()
+"""
 
 history = dict()
 
@@ -138,9 +141,52 @@ while True:
   if it_modulo == 12 or it_modulo == 16 or it_modulo == 0:
     beep()
   thresh = get_threshold()
-  #colored = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
-  #cv2.drawContours(colored, [get_max_contour(thresh)], 0, (0, 255, 0), 5)
-  show(thresh)
+  colored = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
+  contour = get_max_contour(thresh)
+  """
+  x,y,w,h = cv2.boundingRect(contour)
+  searchable = thresh[y:y+h, x:x+w]
+  loc = cv2.matchTemplate(searchable, np.ones((5, 5), dtype=np.uint8), cv2.cv.CV_TM_CCORR)
+  cv2.rectangle(colored, (x, y), (x+w, y+h), (0, 0, 255), 5)
+  if contour != None:
+    c,r = cv2.minEnclosingCircle(contour)
+    print(c, r)
+    cv2.circle(colored, (int(c[0]), int(c[1])), int(r), (255, 0, 0), 5)
+  if contour != None and len(contour) > 5:
+    ellipse = cv2.fitEllipse(contour)
+    newx = ellipse[0][0] + (ellipse[1][0] - ellipse[0][0]) / 3
+    newy = ellipse[0][1] + (ellipse[1][1] - ellipse[0][1]) / 3
+    ellipse = (ellipse[0], (newx, newy), ellipse[2])
+    cv2.ellipse(colored, ellipse, (255, 0, 0), 5)
+    #cv2.circle(colored, (int(ellipse[0][0]), int(ellipse[1][0])), 10, (0, 255, 0), 10)
+    #cv2.circle(colored, (int(ellipse[0][1]), int(ellipse[1][1])), 10, (255, 0, 0), 10)
+    print(ellipse)
+  """
+  if contour != None:
+    hull = cv2.convexHull(contour, returnPoints=False)
+    defects = cv2.convexityDefects(contour, hull)
+    if defects != None:
+      for defect in defects:
+        idx = defect[0][2]
+        point = contour[idx]
+        print(point)
+        cv2.circle(colored, tuple(point[0]), 10, (0, 255, 255), 3)
+      #cv2.drawContours(colored, [contour], 0, (0, 255, 0), 5)
+      #cv2.drawContours(colored, [hull], 0, (255, 0, 0), 5)
+      #print(defects)
+      #cv2.drawContours(colored, [defects], 0, (255, 0, 0), 5)
+  m = cv2.moments(thresh)
+  area = m['m00']
+  if area > 0.1:
+    x = m['m10'] / area
+    y = m['m01'] / area
+    cv2.circle(colored, (int(x), int(y)), 10, (255, 0, 0), 10)
+    if len(contour) > 5:
+      ellipse = cv2.fitEllipse(contour)
+      cv2.circle(colored, (int(ellipse[0][0]), int(ellipse[0][1])), 10, (0, 255, 0), 10)
+
+  show(colored)
+  continue
   if isScanning():
     comparision = compare(thresh)
     winner = { v:k for k, v in comparision.items() }[max(comparision.values())]
