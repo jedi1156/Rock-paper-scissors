@@ -71,6 +71,9 @@ def compare_to(image, figure):
 def compare(image):
   return { 'rock': compare_to(image, rock), 'paper': compare_to(image, paper), 'scissors': compare_to(image, scissors) }
 
+def beep():
+  print("\a") 
+
 scan_time = 2000
 cv2.cv.CV_TM_CCOEFF_NORMED
 print("Rock Paper Scissors")
@@ -97,9 +100,14 @@ show(scissors)
 
 while True:
   thresh = get_threshold()
-  show(thresh)
   iteration += 1
-  if iteration % 10 == 0:
+  modulo = 20
+  it_modulo = iteration % modulo
+  if it_modulo == 12 or it_modulo == 16:
+    beep()
+  if it_modulo == 0:
+    beep()
+    show(thresh)
     comparision = compare(thresh)
     winner = { v:k for k, v in comparision.items() }[max(comparision.values())]
     print('Round %d' % iteration)
