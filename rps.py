@@ -101,15 +101,16 @@ cv2.waitKey(scan_time)
 scissors = get_figure()
 show(scissors)
 
+history = dict()
+
 while True:
-  thresh = get_threshold()
   iteration += 1
   modulo = 20
   it_modulo = iteration % modulo
-  if it_modulo == 12 or it_modulo == 16:
+  if it_modulo == 12 or it_modulo == 16 or it_modulo == 0:
     beep()
-  if it_modulo == 0:
-    beep()
+  thresh = get_threshold()
+  if it_modulo < 3:
     show(thresh)
     comparision = compare(thresh)
     winner = { v:k for k, v in comparision.items() }[max(comparision.values())]
@@ -119,3 +120,10 @@ while True:
     print('Scissors: %f' % comparision['scissors'])
     print('WINNER: %s' % winner)
     print('')
+    if not winner in history:
+      history[winner] = 0
+    history[winner] += 1
+  elif it_modulo == 3:
+    print(history)
+  elif it_modulo == 4:
+    history = dict()
