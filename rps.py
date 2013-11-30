@@ -10,6 +10,7 @@ camera = cv2.VideoCapture(0)
 skin_min = np.array([0, 0, 70], np.uint8)
 skin_max = np.array([20, 255, 255], np.uint8)
 iteration = 0
+modulo = 20
 
 def read_image():
   ret, image = camera.read(0)
@@ -27,9 +28,8 @@ def get_image():
   result = cv2.cvtColor(result, cv2.COLOR_BGR2HSV)
   result = cv2.inRange(result, np.array([0, 0, 50]), np.array([255, 255, 255]))
 
-  neg_result = result == 0
-
-  cv2.accumulateWeighted(frame, scan, 0.005, neg_result)
+  if not isScanning():
+    cv2.accumulateWeighted(frame, scan, 0.001)
 
   return result
 
@@ -77,6 +77,9 @@ def compare(image):
 def beep():
   print("\a") 
 
+def isScanning():
+ return iteration % modulo < 3
+
 scan_time = 2000
 cv2.cv.CV_TM_CCOEFF_NORMED
 print("Rock Paper Scissors")
@@ -105,13 +108,12 @@ history = dict()
 
 while True:
   iteration += 1
-  modulo = 20
   it_modulo = iteration % modulo
   if it_modulo == 12 or it_modulo == 16 or it_modulo == 0:
     beep()
   thresh = get_threshold()
-  if it_modulo < 3:
-    show(thresh)
+  show(thresh)
+  if isScanning():
     comparision = compare(thresh)
     winner = { v:k for k, v in comparision.items() }[max(comparision.values())]
     print('Round %d' % iteration)
