@@ -37,20 +37,24 @@ def get_contours(image):
   contours, hierarchy = cv2.findContours(image, cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
   return contours
 
+def get_max_contour(image):
+  contours = get_contours(copy.copy(image))
+  chosen = (0, None)
+  for contour in contours:
+    x,y,w,h = cv2.boundingRect(contour)
+    if chosen[0] < w * h:
+      chosen = (w*h, contour)
+  return chosen[1]
+
 def get_threshold():
   thresh = get_image()
   return thresh
 
 def get_figure():
   thresh = get_image()
-  contours = get_contours(copy.copy(thresh))
-  chosen = (0, None)
-  for contour in contours:
-    x,y,w,h = cv2.boundingRect(contour)
-    if chosen[0] < w * h:
-      chosen = (w*h, contour)
-  if chosen[1] != None:
-    x,y,w,h = cv2.boundingRect(chosen[1])
+  chosen = get_max_contour(thresh)
+  if chosen != None:
+    x,y,w,h = cv2.boundingRect(chosen)
     margin = 50
     w = w + 2 * margin
     h = h + 2 * margin
@@ -67,9 +71,14 @@ def get_figure():
 def show(image):
   cv2.imshow('mainWindow', image)
 
+def moments(image):
+  moments = cv2.moments(get_max_contour(image))
+  return cv2.HuMoments(moments)[0]
+
 def compare_to(image, figure):
-  result = cv2.matchTemplate(image, figure, cv2.cv.CV_TM_CCOEFF_NORMED)
-  return result.max()
+  img_moments = moments(image)
+  fig_moments = moments(figure)
+  return float(10 - abs(img_moments[0] - fig_moments[0]))
 
 def compare(image):
   return { 'rock': compare_to(image, rock), 'paper': compare_to(image, paper), 'scissors': compare_to(image, scissors) }
@@ -78,7 +87,7 @@ def beep():
   print("\a") 
 
 def isScanning():
- return iteration % modulo < 3
+ return iteration > 0 and iteration % modulo < 3
 
 scan_time = 2000
 cv2.cv.CV_TM_CCOEFF_NORMED
