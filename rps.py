@@ -93,6 +93,7 @@ cv2.cv.CV_TM_CCOEFF_NORMED
 print("Rock Paper Scissors")
 
 moment_thresholds = (0.5, 0.005)
+area_threshold = 90
 class Pattern:
   def __init__(self, name):
     self.name = name
@@ -100,15 +101,19 @@ class Pattern:
     cv2.waitKey(scan_time)
     self.img, self.contour = get_figure()
     self.moments = moments(self.contour)
+    print(self.moments)
 
   def show(self):
     show(self.img)
 
   def detect(self, image):
     for c in get_contours(image):
-      c_ms = moments(c)
-      if(all([abs(self.moments[i] - c_ms[i]) < moment_thresholds[i] for i in [0, 1]])):
-        return True
+      area = cv2.contourArea(c)
+      if(area > area_threshold):
+        c_ms = moments(c)
+        if(all([abs(self.moments[i] - c_ms[i]) < moment_thresholds[i] for i in [0, 1]])):
+          print(self.name, self.moments, c_ms)
+          return True
     return False
 
 
