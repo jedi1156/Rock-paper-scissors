@@ -16,19 +16,26 @@ def read_image():
   ret, image = camera.read(0)
   return image
 
+lowThreshold = 0
+max_lowThreshold = 100
+ratio = 3
+kernel_size = 3
 def get_image():
   global scan
   global iteration
   frame = read_image()
 
-  result = frame.astype(np.int32)
-  result = np.subtract(scan, result)
-  result = np.abs(result)
-  result = result.astype(np.uint8)
-  result = cv2.cvtColor(result, cv2.COLOR_BGR2HSV)
-  result = cv2.inRange(result, np.array([0, 0, 10]), np.array([255, 255, 255]))
-  result = cv2.erode(result, np.ones((10, 10)))
-  result = cv2.dilate(result, np.ones((10, 10)))
+  # result = frame.astype(np.int32)
+  # result = np.subtract(scan, result)
+  # result = np.abs(result)
+  # result = result.astype(np.uint8)
+  # result = cv2.cvtColor(result, cv2.COLOR_BGR2HSV)
+  # result = cv2.inRange(result, np.array([0, 0, 10]), np.array([255, 255, 255]))
+  # result = cv2.erode(result, np.ones((10, 10)))
+  # result = cv2.dilate(result, np.ones((10, 10)))
+  gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+  result = cv2.GaussianBlur(gray,(3,3),0)
+  result = cv2.Canny(result,lowThreshold,lowThreshold*ratio,apertureSize = kernel_size)
 
   #if not isScanning():
   #cv2.accumulateWeighted(frame, scan, 0.005)
@@ -92,7 +99,7 @@ scan_time = 2000
 cv2.cv.CV_TM_CCOEFF_NORMED
 print("Rock Paper Scissors")
 
-moment_thresholds = (0.5, 0.005)
+moment_thresholds = (0.1, 0.05)
 area_threshold = 90
 class Pattern:
   def __init__(self, name):
