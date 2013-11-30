@@ -10,11 +10,19 @@ camera = cv2.VideoCapture(0)
 skin_min = np.array([0, 0, 70], np.uint8)
 skin_max = np.array([20, 255, 255], np.uint8)
 
-def get_image():
+def read_image():
   ret, image = camera.read(0)
-  blurred = cv2.GaussianBlur(image, (5, 5), 0)
-  hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
-  return cv2.inRange(hsv, skin_min, skin_max)
+  return image
+
+def get_image():
+  frame = read_image()
+  frame = frame.astype(np.int32)
+  result = np.subtract(scan, frame)
+  result = np.abs(result)
+  result = result.astype(np.uint8)
+  result = cv2.cvtColor(result, cv2.COLOR_BGR2HSV)
+  result = cv2.inRange(result, np.array([0, 0, 50]), np.array([255, 255, 255]))
+  return result
 
 def get_contours(image):
   contours, hierarchy = cv2.findContours(image, cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
@@ -51,6 +59,11 @@ def compare(image):
 scan_time = 2000
 cv2.cv.CV_TM_CCOEFF_NORMED
 print("Rock Paper Scissors")
+
+print("scan BACKGROUND")
+cv2.waitKey(scan_time)
+scan = read_image()
+scan = scan.astype(np.int32)
 
 print("scan ROCK")
 cv2.waitKey(scan_time)
