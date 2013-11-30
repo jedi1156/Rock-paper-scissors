@@ -25,17 +25,17 @@ def get_image():
   global iteration
   frame = read_image()
 
-  # result = frame.astype(np.int32)
-  # result = np.subtract(scan, result)
-  # result = np.abs(result)
-  # result = result.astype(np.uint8)
-  # result = cv2.cvtColor(result, cv2.COLOR_BGR2HSV)
-  # result = cv2.inRange(result, np.array([0, 0, 10]), np.array([255, 255, 255]))
-  # result = cv2.erode(result, np.ones((10, 10)))
-  # result = cv2.dilate(result, np.ones((10, 10)))
-  gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-  result = cv2.GaussianBlur(gray,(3,3),0)
-  result = cv2.Canny(result,lowThreshold,lowThreshold*ratio,apertureSize = kernel_size)
+  result = frame.astype(np.int32)
+  result = np.subtract(scan, result)
+  result = np.abs(result)
+  result = result.astype(np.uint8)
+  result = cv2.cvtColor(result, cv2.COLOR_BGR2HSV)
+  result = cv2.inRange(result, np.array([0, 0, 10]), np.array([255, 255, 255]))
+  result = cv2.erode(result, np.ones((10, 10)))
+  result = cv2.dilate(result, np.ones((10, 10)))
+  #gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+  #result = cv2.GaussianBlur(gray,(3,3),0)
+  #result = cv2.Canny(result,lowThreshold,lowThreshold*ratio,apertureSize = kernel_size)
 
   #if not isScanning():
   #cv2.accumulateWeighted(frame, scan, 0.005)
@@ -114,15 +114,7 @@ class Pattern:
     show(self.img)
 
   def detect(self, image):
-    for c in get_contours(image):
-      area = cv2.contourArea(c)
-      if(area > area_threshold):
-        c_ms = moments(c)
-        if(all([abs(self.moments[i] - c_ms[i]) < moment_thresholds[i] for i in [0, 1]])):
-          print(self.name, self.moments, c_ms)
-          return True
-    return False
-
+    return cv2.matchShapes(self.contour, get_max_contour(image), cv2.cv.CV_CONTOURS_MATCH_I3, 0)
 
 print("scan BACKGROUND")
 cv2.waitKey(scan_time)
