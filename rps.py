@@ -42,6 +42,15 @@ def get_figure():
       chosen = (w*h, contour)
   if chosen[1] != None:
     x,y,w,h = cv2.boundingRect(chosen[1])
+    margin = 50
+    w = w + 2 * margin
+    h = h + 2 * margin
+    x = x - margin
+    y = y - margin
+    if x < 0:
+      x = 0
+    if y < 0:
+      y = 0
     return thresh[y:y+h, x:x+w]
   else:
     return thresh
