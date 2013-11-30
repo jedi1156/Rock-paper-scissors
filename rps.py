@@ -26,10 +26,12 @@ def get_image():
   result = np.abs(result)
   result = result.astype(np.uint8)
   result = cv2.cvtColor(result, cv2.COLOR_BGR2HSV)
-  result = cv2.inRange(result, np.array([0, 0, 50]), np.array([255, 255, 255]))
+  result = cv2.inRange(result, np.array([0, 0, 10]), np.array([255, 255, 255]))
+  result = cv2.erode(result, np.ones((10, 10)))
+  result = cv2.dilate(result, np.ones((10, 10)))
 
-  if not isScanning():
-    cv2.accumulateWeighted(frame, scan, 0.001)
+  #if not isScanning():
+  #cv2.accumulateWeighted(frame, scan, 0.005)
 
   return result
 
@@ -41,9 +43,8 @@ def get_max_contour(image):
   contours = get_contours(copy.copy(image))
   chosen = (0, None)
   for contour in contours:
-    x,y,w,h = cv2.boundingRect(contour)
-    if chosen[0] < w * h:
-      chosen = (w*h, contour)
+    if chosen[0] < len(contour):
+      chosen = (len(contour), contour)
   return chosen[1]
 
 def get_threshold():
@@ -89,7 +90,7 @@ def beep():
 def isScanning():
  return iteration > 0 and iteration % modulo < 3
 
-scan_time = 2000
+scan_time = 20
 cv2.cv.CV_TM_CCOEFF_NORMED
 print("Rock Paper Scissors")
 
@@ -121,7 +122,10 @@ while True:
   if it_modulo == 12 or it_modulo == 16 or it_modulo == 0:
     beep()
   thresh = get_threshold()
-  show(thresh)
+  colored = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
+  cv2.drawContours(colored, [get_max_contour(thresh)], 0, (0, 255, 0), 5)
+  show(colored)
+  continue
   if isScanning():
     comparision = compare(thresh)
     winner = { v:k for k, v in comparision.items() }[max(comparision.values())]
