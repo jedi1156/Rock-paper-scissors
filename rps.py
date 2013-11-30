@@ -32,15 +32,17 @@ def get_image():
   result = cv2.cvtColor(result, cv2.COLOR_BGR2HSV)
   result = cv2.inRange(result, np.array([0, 0, 10]), np.array([255, 255, 255]))
   result = cv2.erode(result, np.ones((10, 10)))
-  result = cv2.dilate(result, np.ones((10, 10)))
-  #gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-  #result = cv2.GaussianBlur(gray,(3,3),0)
-  #result = cv2.Canny(result,lowThreshold,lowThreshold*ratio,apertureSize = kernel_size)
+  result = cv2.dilate(result, np.ones((20, 20)))
+
+  gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
+  cannied = cv2.GaussianBlur(gray,(3,3),0)
+  cannied = cv2.Canny(cannied,lowThreshold,lowThreshold*ratio,apertureSize = kernel_size)
 
   #if not isScanning():
   #cv2.accumulateWeighted(frame, scan, 0.005)
 
-  return result
+  return result & cannied
+
 
 def get_contours(image):
   contours, hierarchy = cv2.findContours(image, cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
