@@ -77,9 +77,7 @@ def moments(contour):
   return (ms[0][0], ms[1][0])
 
 def compare_to(image, figure):
-  img_moments = moments(image)
-  fig_moments = moments(figure)
-  return float(10 - abs(img_moments[0] - fig_moments[0]))
+  return figure.detect(image)
 
 def compare(image):
   return { 'rock': compare_to(image, rock), 'paper': compare_to(image, paper), 'scissors': compare_to(image, scissors) }
@@ -90,7 +88,7 @@ def beep():
 def isScanning():
  return iteration > 0 and iteration % modulo < 3
 
-scan_time = 20
+scan_time = 2000
 cv2.cv.CV_TM_CCOEFF_NORMED
 print("Rock Paper Scissors")
 
@@ -101,7 +99,7 @@ class Pattern:
     print("scan %s" % name)
     cv2.waitKey(scan_time)
     self.img, self.contour = get_figure()
-    self.moments = moments(get_max_contour(self.img))
+    self.moments = moments(self.contour)
 
   def show(self):
     show(self.img)
@@ -110,8 +108,8 @@ class Pattern:
     for c in get_contours(image):
       c_ms = moments(c)
       if(all([abs(self.moments[i] - c_ms[i]) < moment_thresholds[i] for i in [0, 1]])):
-        return true
-    return false
+        return True
+    return False
 
 
 print("scan BACKGROUND")
@@ -134,10 +132,9 @@ while True:
   if it_modulo == 12 or it_modulo == 16 or it_modulo == 0:
     beep()
   thresh = get_threshold()
-  colored = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
-  cv2.drawContours(colored, [get_max_contour(thresh)], 0, (0, 255, 0), 5)
-  show(colored)
-  continue
+  #colored = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
+  #cv2.drawContours(colored, [get_max_contour(thresh)], 0, (0, 255, 0), 5)
+  show(thresh)
   if isScanning():
     comparision = compare(thresh)
     winner = { v:k for k, v in comparision.items() }[max(comparision.values())]
