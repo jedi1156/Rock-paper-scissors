@@ -65,16 +65,16 @@ def get_figure():
       x = 0
     if y < 0:
       y = 0
-    return thresh[y:y+h, x:x+w]
+    return (thresh[y:y+h, x:x+w], chosen)
   else:
-    return thresh
+    return (thresh, None)
 
 def show(image):
   cv2.imshow('mainWindow', image)
 
-def moments(image):
-  moments = cv2.moments(get_max_contour(image))
-  return cv2.HuMoments(moments)[0]
+def moments(contour):
+  ms = cv2.HuMoments(cv2.moments(contour))
+  return (ms[0][0], ms[1][0])
 
 def compare_to(image, figure):
   img_moments = moments(image)
@@ -94,25 +94,37 @@ scan_time = 20
 cv2.cv.CV_TM_CCOEFF_NORMED
 print("Rock Paper Scissors")
 
+moment_thresholds = (0.5, 0.005)
+class Pattern:
+  def __init__(self, name):
+    self.name = name
+    print("scan %s" % name)
+    cv2.waitKey(scan_time)
+    self.img, self.contour = get_figure()
+    self.moments = moments(get_max_contour(self.img))
+
+  def show(self):
+    show(self.img)
+
+  def detect(self, image):
+    for c in get_contours(image):
+      c_ms = moments(c)
+      if(all([abs(self.moments[i] - c_ms[i]) < moment_thresholds[i] for i in [0, 1]])):
+        return true
+    return false
+
+
 print("scan BACKGROUND")
 cv2.waitKey(scan_time)
 scan = read_image()
 scan = np.float32(scan)
 
-print("scan ROCK")
-cv2.waitKey(scan_time)
-rock = get_figure()
-show(rock)
-
-print("scan PAPER")
-cv2.waitKey(scan_time)
-paper = get_figure()
-show(paper)
-
-print("scan SCISSORS")
-cv2.waitKey(scan_time)
-scissors = get_figure()
-show(scissors)
+rock = Pattern("ROCK")
+paper = Pattern("PAPER")
+scissors = Pattern("SCISSORS")
+patterns = (rock, paper, scissors)
+for p in patterns:
+  p.show()
 
 history = dict()
 
