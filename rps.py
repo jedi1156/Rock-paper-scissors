@@ -195,12 +195,13 @@ while True:
     if angle < 0:
       angle += 180
     end1   = (int(center[0] - np.cos(np.radians(angle)) * size[1] / 2), int(center[1] - np.sin(np.radians(angle)) * size[1] / 2))
-    #mask_center = (center[0] + (end1[0] - center[0]) / 2, center[1] + (end1[1] - center[1] / 2))
-    cv2.ellipse(colored, ellipse, (255, 0, 0), 5)
+    mask_center = (center[0] + (end1[0] - center[0]) / 2, center[1] + (end1[1] - center[1]) / 2)
+    mask_radius = int(size[1] * 0.375)
     cv2.line(colored, center, end1, (0, 255, 0), 5)
     cv2.circle(colored, center, 10, (0, 255, 0), 10)
     cv2.circle(colored, end1, 10, (0, 255, 0), 10)
-    #cv2.circle(colored, mask_center, 10, (0, 0, 255), 10)
+    cv2.circle(colored, mask_center, 10, (0, 0, 255), 10)
+    cv2.circle(colored, mask_center, mask_radius, (0, 0, 255), 5)
 
   show(colored)
   if testing:
