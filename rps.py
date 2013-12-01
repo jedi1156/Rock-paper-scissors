@@ -91,7 +91,10 @@ def beep():
   print("\a") 
 
 def isScanning():
- return iteration > 0 and iteration % modulo < 3
+ return iteration > 4 and 4 <= iteration % modulo <= 5
+
+def finishedScanning():
+  return iteration > 6 and iteration % modulo == 6
 
 def detect_palm(contour):
   ellipse = cv2.fitEllipse(contour)
@@ -166,22 +169,22 @@ while True:
     cv2.circle(colored, center, 10, (0, 0, 255), 5)
     cv2.circle(colored, center, radius, (0, 0, 255), 5)
 
-    show(colored)
   if testing:
     continue
   if isScanning():
     comparision = compare(thresh)
-    winner = { v:k for k, v in comparision.items() }[min(comparision.values())]
     print('Round %d' % iteration)
     print('Rock: %f' % comparision['rock'])
     print('Paper: %f' % comparision['paper'])
     print('Scissors: %f' % comparision['scissors'])
+    for figure, value in comparision.items():
+      if not figure in history:
+        history[figure] = 0.0
+      history[figure] += value
+    show(colored)
+  elif finishedScanning():
+    winner = { v:k for k, v in history.items() }[min(history.values())]
+    print(history)
     print('WINNER: %s' % winner)
     print('')
-    if not winner in history:
-      history[winner] = 0
-    history[winner] += 1
-  elif it_modulo == 3:
-    print(history)
-  elif it_modulo == 4:
     history = dict()
