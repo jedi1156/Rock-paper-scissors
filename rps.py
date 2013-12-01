@@ -31,20 +31,12 @@ def get_image():
   result = result.astype(np.uint8)
   result = cv2.cvtColor(result, cv2.COLOR_BGR2HSV)
   result = cv2.inRange(result, np.array([0, 0, 10]), np.array([255, 255, 255]))
-
-  # result[int(result.shape[0] / 1.5):] = np.zeros(result.shape[1])
-
   result = cv2.erode(result, np.ones((10, 10)))
   result = cv2.dilate(result, np.ones((20, 20)))
-
-  #gray = cv2.cvtColor(frame,cv2.COLOR_BGR2GRAY)
-  #cannied = cv2.GaussianBlur(gray,(3,3),0)
-  #cannied = cv2.Canny(cannied,lowThreshold,lowThreshold*ratio,apertureSize = kernel_size)
 
   #if not isScanning():
   #cv2.accumulateWeighted(frame, scan, 0.005)
 
-  #return result & cannied
   return result
 
 
@@ -158,47 +150,6 @@ while True:
   colored = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
   contour = get_max_contour(thresh)
   cv2.drawContours(colored, [contour], 0, (255, 0, 0), 5)
-  """
-  x,y,w,h = cv2.boundingRect(contour)
-  searchable = thresh[y:y+h, x:x+w]
-  loc = cv2.matchTemplate(searchable, np.ones((5, 5), dtype=np.uint8), cv2.cv.CV_TM_CCORR)
-  cv2.rectangle(colored, (x, y), (x+w, y+h), (0, 0, 255), 5)
-  if contour != None:
-    c,r = cv2.minEnclosingCircle(contour)
-    print(c, r)
-    cv2.circle(colored, (int(c[0]), int(c[1])), int(r), (255, 0, 0), 5)
-  if contour != None and len(contour) > 5:
-    ellipse = cv2.fitEllipse(contour)
-    newx = ellipse[0][0] + (ellipse[1][0] - ellipse[0][0]) / 3
-    newy = ellipse[0][1] + (ellipse[1][1] - ellipse[0][1]) / 3
-    ellipse = (ellipse[0], (newx, newy), ellipse[2])
-    cv2.ellipse(colored, ellipse, (255, 0, 0), 5)
-    #cv2.circle(colored, (int(ellipse[0][0]), int(ellipse[1][0])), 10, (0, 255, 0), 10)
-    #cv2.circle(colored, (int(ellipse[0][1]), int(ellipse[1][1])), 10, (255, 0, 0), 10)
-    print(ellipse)
-  if contour != None:
-    hull = cv2.convexHull(contour, returnPoints=False)
-    defects = cv2.convexityDefects(contour, hull)
-    if defects != None:
-      for defect in defects:
-        idx = defect[0][2]
-        point = contour[idx]
-        cv2.circle(colored, tuple(point[0]), 5, (0, 255, 0), 3)
-  """
-  """
-      #cv2.drawContours(colored, [contour], 0, (0, 255, 0), 5)
-      #cv2.drawContours(colored, [hull], 0, (255, 0, 0), 5)
-      #print(defects)
-      #cv2.drawContours(colored, [defects], 0, (255, 0, 0), 5)
-  """
-  """
-  m = cv2.moments(thresh)
-  area = m['m00']
-  if area > 0.1:
-    x = m['m10'] / area
-    y = m['m01'] / area
-    cv2.circle(colored, (int(x), int(y)), 10, (255, 0, 0), 10)
-  """
   if contour != None and len(contour) > 5:
     center, radius = detect_palm(contour)
     cv2.circle(colored, center, 10, (0, 0, 255), 5)
