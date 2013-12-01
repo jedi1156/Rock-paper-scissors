@@ -101,12 +101,8 @@ def beep():
 def isScanning():
  return iteration > 0 and iteration % modulo < 3
 
-scan_time = 2000
-cv2.cv.CV_TM_CCOEFF_NORMED
 print("Rock Paper Scissors")
 
-moment_thresholds = (0.1, 0.05)
-area_threshold = 90
 class Pattern:
   def __init__(self, name):
     self.name = name
@@ -122,20 +118,24 @@ class Pattern:
   def detect(self, image):
     return cv2.matchShapes(self.contour, get_max_contour(image), cv2.cv.CV_CONTOURS_MATCH_I3, 0)
 
+scan_time = 2000
+testing = True
+
 print("scan BACKGROUND")
 cv2.waitKey(scan_time)
 scan = read_image()
 scan = np.float32(scan)
 
-rock = Pattern("ROCK")
-rock.show()
-paper = Pattern("PAPER")
-paper.show()
-scissors = Pattern("SCISSORS")
-scissors.show()
-patterns = (rock, paper, scissors)
+if not testing:
+  rock = Pattern("ROCK")
+  rock.show()
+  paper = Pattern("PAPER")
+  paper.show()
+  scissors = Pattern("SCISSORS")
+  scissors.show()
+  patterns = (rock, paper, scissors)
 
-history = dict()
+  history = dict()
 
 while True:
   iteration += 1
@@ -191,6 +191,8 @@ while True:
   """
 
   show(colored)
+  if testing:
+    continue
   if isScanning():
     comparision = compare(thresh)
     winner = { v:k for k, v in comparision.items() }[min(comparision.values())]
