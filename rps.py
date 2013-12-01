@@ -101,6 +101,18 @@ def beep():
 def isScanning():
  return iteration > 0 and iteration % modulo < 3
 
+def detect_palm(contour):
+  ellipse = cv2.fitEllipse(contour)
+  center = (int(ellipse[0][0]), int(ellipse[0][1]))
+  size   = (int(ellipse[1][0]), int(ellipse[1][1]))
+  angle  = ellipse[2] - 90
+  if angle < 0:
+    angle += 180
+  end1   = (int(center[0] - np.cos(np.radians(angle)) * size[1] / 2), int(center[1] - np.sin(np.radians(angle)) * size[1] / 2))
+  mask_center = (center[0] + (end1[0] - center[0]) / 2, center[1] + (end1[1] - center[1]) / 2)
+  mask_radius = int(size[1] * 0.375)
+  return (mask_center, mask_radius)
+
 print("Rock Paper Scissors")
 
 class Pattern:
@@ -188,20 +200,9 @@ while True:
     cv2.circle(colored, (int(x), int(y)), 10, (255, 0, 0), 10)
   """
   if contour != None and len(contour) > 5:
-    ellipse = cv2.fitEllipse(contour)
-    center = (int(ellipse[0][0]), int(ellipse[0][1]))
-    size   = (int(ellipse[1][0]), int(ellipse[1][1]))
-    angle  = ellipse[2] - 90
-    if angle < 0:
-      angle += 180
-    end1   = (int(center[0] - np.cos(np.radians(angle)) * size[1] / 2), int(center[1] - np.sin(np.radians(angle)) * size[1] / 2))
-    mask_center = (center[0] + (end1[0] - center[0]) / 2, center[1] + (end1[1] - center[1]) / 2)
-    mask_radius = int(size[1] * 0.375)
-    cv2.line(colored, center, end1, (0, 255, 0), 5)
-    cv2.circle(colored, center, 10, (0, 255, 0), 10)
-    cv2.circle(colored, end1, 10, (0, 255, 0), 10)
-    cv2.circle(colored, mask_center, 10, (0, 0, 255), 10)
-    cv2.circle(colored, mask_center, mask_radius, (0, 0, 255), 5)
+    center, radius = detect_palm(contour)
+    cv2.circle(colored, center, 10, (0, 0, 255), 5)
+    cv2.circle(colored, center, radius, (0, 0, 255), 5)
 
   show(colored)
   if testing:
