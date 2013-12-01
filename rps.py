@@ -105,6 +105,11 @@ def detect_palm(contour):
   mask_radius = int(size[1] * 0.375)
   return (mask_center, mask_radius)
 
+def mask_palm(image, circle):
+  mask = np.zeros(image.shape, dtype=np.uint8)
+  cv2.circle(mask, circle[0], circle[1], 1, -1)
+  return image * mask
+
 print("Rock Paper Scissors")
 
 class Pattern:
@@ -112,7 +117,10 @@ class Pattern:
     self.name = name
     print("scan %s" % name)
     cv2.waitKey(scan_time)
-    self.img, self.contour = get_figure()
+    self.img = get_image()
+    palm = detect_palm(get_max_contour(self.img))
+    self.img = mask_palm(self.img, palm)
+    self.contour = get_max_contour(self.img)
     self.moments = moments(self.contour)
     print(self.moments)
 
@@ -123,7 +131,7 @@ class Pattern:
     return cv2.matchShapes(self.contour, get_max_contour(image), cv2.cv.CV_CONTOURS_MATCH_I3, 0)
 
 scan_time = 2000
-testing = True
+testing = False
 
 print("scan BACKGROUND")
 cv2.waitKey(scan_time)
@@ -147,15 +155,18 @@ while True:
   if it_modulo == 12 or it_modulo == 16 or it_modulo == 0:
     beep()
   thresh = get_threshold()
-  colored = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
   contour = get_max_contour(thresh)
-  cv2.drawContours(colored, [contour], 0, (255, 0, 0), 5)
   if contour != None and len(contour) > 5:
     center, radius = detect_palm(contour)
+    masked = mask_palm(thresh, (center, radius))
+    thresh = copy.copy(masked)
+
+    colored = cv2.cvtColor(masked, cv2.COLOR_GRAY2RGB)
+    cv2.drawContours(colored, [contour], 0, (255, 0, 0), 5)
     cv2.circle(colored, center, 10, (0, 0, 255), 5)
     cv2.circle(colored, center, radius, (0, 0, 255), 5)
 
-  show(colored)
+    show(colored)
   if testing:
     continue
   if isScanning():
