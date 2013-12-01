@@ -31,6 +31,9 @@ def get_image():
   result = result.astype(np.uint8)
   result = cv2.cvtColor(result, cv2.COLOR_BGR2HSV)
   result = cv2.inRange(result, np.array([0, 0, 10]), np.array([255, 255, 255]))
+
+  # result[int(result.shape[0] / 1.5):] = np.zeros(result.shape[1])
+
   result = cv2.erode(result, np.ones((10, 10)))
   result = cv2.dilate(result, np.ones((20, 20)))
 
@@ -124,14 +127,13 @@ cv2.waitKey(scan_time)
 scan = read_image()
 scan = np.float32(scan)
 
-"""
 rock = Pattern("ROCK")
+rock.show()
 paper = Pattern("PAPER")
+paper.show()
 scissors = Pattern("SCISSORS")
+scissors.show()
 patterns = (rock, paper, scissors)
-for p in patterns:
-  p.show()
-"""
 
 history = dict()
 
@@ -143,6 +145,7 @@ while True:
   thresh = get_threshold()
   colored = cv2.cvtColor(thresh, cv2.COLOR_GRAY2RGB)
   contour = get_max_contour(thresh)
+  cv2.drawContours(colored, [contour], 0, (255, 0, 0), 5)
   """
   x,y,w,h = cv2.boundingRect(contour)
   searchable = thresh[y:y+h, x:x+w]
@@ -161,6 +164,7 @@ while True:
     #cv2.circle(colored, (int(ellipse[0][0]), int(ellipse[1][0])), 10, (0, 255, 0), 10)
     #cv2.circle(colored, (int(ellipse[0][1]), int(ellipse[1][1])), 10, (255, 0, 0), 10)
     print(ellipse)
+  """
   """
   if contour != None:
     hull = cv2.convexHull(contour, returnPoints=False)
@@ -184,12 +188,12 @@ while True:
     if len(contour) > 5:
       ellipse = cv2.fitEllipse(contour)
       cv2.circle(colored, (int(ellipse[0][0]), int(ellipse[0][1])), 10, (0, 255, 0), 10)
+  """
 
   show(colored)
-  continue
   if isScanning():
     comparision = compare(thresh)
-    winner = { v:k for k, v in comparision.items() }[max(comparision.values())]
+    winner = { v:k for k, v in comparision.items() }[min(comparision.values())]
     print('Round %d' % iteration)
     print('Rock: %f' % comparision['rock'])
     print('Paper: %f' % comparision['paper'])
