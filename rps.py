@@ -164,8 +164,6 @@ while True:
     #cv2.circle(colored, (int(ellipse[0][0]), int(ellipse[1][0])), 10, (0, 255, 0), 10)
     #cv2.circle(colored, (int(ellipse[0][1]), int(ellipse[1][1])), 10, (255, 0, 0), 10)
     print(ellipse)
-  """
-  """
   if contour != None:
     hull = cv2.convexHull(contour, returnPoints=False)
     defects = cv2.convexityDefects(contour, hull)
@@ -173,22 +171,36 @@ while True:
       for defect in defects:
         idx = defect[0][2]
         point = contour[idx]
-        print(point)
-        cv2.circle(colored, tuple(point[0]), 10, (0, 255, 255), 3)
+        cv2.circle(colored, tuple(point[0]), 5, (0, 255, 0), 3)
+  """
+  """
       #cv2.drawContours(colored, [contour], 0, (0, 255, 0), 5)
       #cv2.drawContours(colored, [hull], 0, (255, 0, 0), 5)
       #print(defects)
       #cv2.drawContours(colored, [defects], 0, (255, 0, 0), 5)
+  """
+  """
   m = cv2.moments(thresh)
   area = m['m00']
   if area > 0.1:
     x = m['m10'] / area
     y = m['m01'] / area
     cv2.circle(colored, (int(x), int(y)), 10, (255, 0, 0), 10)
-    if len(contour) > 5:
-      ellipse = cv2.fitEllipse(contour)
-      cv2.circle(colored, (int(ellipse[0][0]), int(ellipse[0][1])), 10, (0, 255, 0), 10)
   """
+  if contour != None and len(contour) > 5:
+    ellipse = cv2.fitEllipse(contour)
+    center = (int(ellipse[0][0]), int(ellipse[0][1]))
+    size   = (int(ellipse[1][0]), int(ellipse[1][1]))
+    angle  = ellipse[2] - 90
+    if angle < 0:
+      angle += 180
+    end1   = (int(center[0] - np.cos(np.radians(angle)) * size[1] / 2), int(center[1] - np.sin(np.radians(angle)) * size[1] / 2))
+    #mask_center = (center[0] + (end1[0] - center[0]) / 2, center[1] + (end1[1] - center[1] / 2))
+    cv2.ellipse(colored, ellipse, (255, 0, 0), 5)
+    cv2.line(colored, center, end1, (0, 255, 0), 5)
+    cv2.circle(colored, center, 10, (0, 255, 0), 10)
+    cv2.circle(colored, end1, 10, (0, 255, 0), 10)
+    #cv2.circle(colored, mask_center, 10, (0, 0, 255), 10)
 
   show(colored)
   if testing:
